@@ -1,0 +1,5 @@
+{
+  "crm.sto.com": "https://api.sto.com",
+  "domain2.com": "https://api.domain2.com",
+  "default": "https://api.default.com"
+}
