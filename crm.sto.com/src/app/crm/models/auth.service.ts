@@ -1,18 +1,43 @@
-export interface AuthResponse {
-  errors: string[],
-  data:{
-    authenticated: boolean;
-    userId: number;
+export interface LoginResponse {
+  success: {
+    type: string,
+    messages: {
+      [key: string]: string
+    },
+    data: {
+      success: boolean
+    }
   }
 }
 
-export interface LoginResponse {
-  errors: string[],
-  message: string[],
-  data: {
-    user_id: number
+export interface resend2FAResponse {
+  success: {
+    type: string,
+    messages: string,
+    data: {
+      success: boolean
+    }
   }
 }
+
+export interface LogoutResponse {
+  success:{
+    data:{
+      success: boolean
+    }
+  }
+}
+
+export interface UserRole{
+  roles: string[]
+}
+
+export interface UserPermission{
+  permissions: string[]
+}
+
+
+
 
 export interface RegisterResponse {
   success: boolean,
@@ -26,37 +51,43 @@ export interface VerifyResponse {
   message: string;
 }
 
-export interface resend2FAResponse {
-  message: string;
-}
 
-export interface LogoutResponse {
-
-}
 
 export interface ResetPasswordResponse {
-  errors:string[],
-  message: string[],
-  status: boolean,
-  email: string,
-  token: string
+  success:{
+    messages: {
+      [key: string]: string
+    },
+    data:{
+      success: boolean
+    }
+  }
 }
 
 export interface ForgotPasswordResponse {
-  email: string;
-  status: boolean;
+  success:{
+    data:{
+      success: boolean
+    }
+  }
 }
 
 export interface VerifyTwoFactorCodeResponse {
-  message: string;
-  authenticated: boolean;
-  userId: number;
-}
-
-export interface GetUserResponse {
-  id: number,
-  name: string,
-  email: string
+  success: {
+    type: string,
+    messages: {
+      [key: string]: string
+    },
+    data: {
+      user: {
+        id: number,
+        name: string,
+        email: string
+      },
+      roles: string[],
+      permissions: string[]
+    }
+  }
 }
 
 export interface RegisterData {

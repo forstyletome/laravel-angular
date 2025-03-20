@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Notifications\CustomResetPassword;
 use App\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,10 +21,188 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
+    public function login(Request $request): JsonResponse
+    {
+
+        $email = $request->get('email');
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
+
+        $key = 'login_attempts_'.$email;
+
+        if(RateLimiter::tooManyAttempts($key, 5)){
+
+            return $this->errorResponse(__('validation.throttle', ['seconds' => RateLimiter::availableIn($key)]), 429, [
+                'retry_after' => RateLimiter::availableIn($key)
+            ]);
+
+        }
+
+        if(!Auth::validate($request->only('email', 'password'))){
+
+            RateLimiter::hit($key, 60);
+
+            return $this->errorResponse(__('auth.invalid_credential'), 401);
+
+        }
+
+        RateLimiter::clear($key);
+
+        $user = Auth::getLastAttempted();
+
+        if(!$user->hasVerifiedEmail()){
+
+            return $this->errorResponse(__('auth.email_not_verified'), 403);
+
+        }
+
+        $cacheKey = '2fa_code_'.$email;
+
+        if(Cache::has($cacheKey)){
+
+            return $this->successResponse(__('messages.send_code'), 200, [
+                'success' => true
+            ]);
+
+        }
+
+        $code = random_int(100000, 999999);
+
+        Cache::put($cacheKey, Hash::make($code), 60);
+
+        Mail::to($email)->send(new TwoFactorCodeMail($code));
+
+        return $this->successResponse(__('messages.send_code'), 200, [
+            'success' => true
+        ]);
+
+    }
+
+    public function verify2FA(Request $request): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|max:255',
+            'code' => 'required|integer|digits:6',
+        ]);
+
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
+
+        $email = $request->get('email');
+        $code = $request->get('code');
+
+        $cachedCode = Cache::get('2fa_code_'.$email);
+
+        if(!$cachedCode || !Hash::check($code, $cachedCode)){
+
+            return $this->errorResponse(__('auth.invalid_2fa_code'), 401);
+
+        }
+
+        Cache::forget('2fa_code_'.$email);
+
+        $user = User::where('email', $email)->first();
+
+        if(!$user){
+
+            return $this->errorResponse(__('auth.user_not_found'), 404);
+
+        }
+
+        $roles = $user->getRoleNames()->toArray();
+        $permissions = $user->getPermissionNames()->pluck('name')->toArray();
+
+        Auth::login($user);
+
+        return $this->successResponse('', 200, [
+            'user'  => $user,
+            'roles' => $roles,
+            'permissions' => $permissions
+        ]);
+
+    }
+
+    public function resend2FACode(Request $request): JsonResponse
+    {
+
+        $email = $request->get('email');
+        $countdown = $request->get('countdown');
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
+
+        $cacheKey = '2fa_code_'.$email;
+
+        if(Cache::has($cacheKey)){
+
+            return $this->errorResponse(__('validation.throttle', ['seconds' => $countdown]), 429);
+
+        }
+
+        $user = User::where($email);
+
+        if(!$user){
+
+            return $this->errorResponse(__('auth.user_not_found'), 404);
+
+        }
+
+        $code = random_int(100000, 999999);
+
+        Cache::put($cacheKey, Hash::make($code), 60);
+
+        Mail::to($email)->send(new TwoFactorCodeMail($code));
+
+        return $this->successResponse(__('notifications.code_resent'), 200, ['success' => true]);
+
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $cookie = Cookie::forget('XSRF-TOKEN');
+
+        return $this->successResponse('', 200, ['success' => true])->withCookie($cookie);
+
+    }
+
     public function sendResetLinkEmail(Request $request): JsonResponse
     {
 
-        $request->validate(['email' => 'required|email']);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
 
         $email = $request->input('email');
 
@@ -30,9 +210,13 @@ class AuthController extends Controller
 
         if(!$user){
 
-            throw ValidationException::withMessages([
-                'email' => __('passwords.email'),
-            ]);
+            return $this->errorResponse(__('auth.user_not_found'), 404);
+
+        }
+
+        if(Cache::has("password_reset_{$user->id}")){
+
+            return $this->errorResponse(__('auth.password_reset_too_soon'), 429);
 
         }
 
@@ -40,27 +224,33 @@ class AuthController extends Controller
 
         $user->notify(new CustomResetPassword($token));
 
-        return response()->json([
-            'status' => true
-        ]);
+        Cache::put("password_reset_{$user->id}", true, now()->addMinutes(1));
+
+        return $this->successResponse(__('auth.password_reset_sent'), 200, ['success' => true]);
 
     }
 
     public function reset(Request $request): JsonResponse
     {
 
-        $request->validate([
-            'email' => 'required|email',
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
             'token' => 'required',
             'password' => 'required|string|min:8|confirmed'
         ]);
+
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function($user, $password){
 
                 $user->forceFill([
-                    'password' => bcrypt($password),
+                    'password' => Hash::make($password),
                 ])->save();
 
             }
@@ -70,81 +260,17 @@ class AuthController extends Controller
 
             $this->logout($request);
 
-            return response()->json([
-                'errors' => [],
-                'message' => [
-                    __($status)
-                ],
-                'status'  => true
-            ], 200);
+            return $this->successResponse(__('auth.password_reset_success'), 200, ['success' => true]);
 
         }
 
-        $errorKey = $status === Password::INVALID_USER ? 'email' : 'token';
-
-        throw ValidationException::withMessages([
-            'errors' => [
-                $errorKey => [trans($status)]
-            ]
-        ]);
+        return $this->errorResponse(__('auth.password_reset_failed'), 400);
 
     }
 
-    public function login(Request $request): JsonResponse
-    {
 
-        $email = $request->get('email');
 
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
 
-        $credentials = $request->only('email', 'password');
-
-        if(!Auth::validate($credentials)){
-
-            return response()->json([
-                'errors' => [
-                    __('validation.invalid_credential')
-                ]
-            ],
-                401
-            );
-
-        }
-
-        $user = Auth::getProvider()->retrieveByCredentials($credentials);
-
-        if(!$user->hasVerifiedEmail()){
-
-            return response()->json([
-                'errors' => [
-                    __('validation.email_not_verified')
-                ]
-            ],
-                403
-            );
-
-        }
-
-        $code = random_int(100000, 999999);
-
-        Cache::put('2fa_code_'.$user->getAuthIdentifier(), $code, 600);
-
-        Mail::to($email)->send(new TwoFactorCodeMail($code));
-
-        return response()->json([
-            'errors' => [],
-            'message' => [
-                __('messages.send_code')
-            ],
-            'data' => [
-                'user_id' => $user->getAuthIdentifier()
-            ]
-        ]);
-
-    }
 
     public function register(Request $request): JsonResponse
     {
@@ -242,96 +368,57 @@ class AuthController extends Controller
 
     }
 
-    public function verify2FA(Request $request): JsonResponse
+
+
+
+
+
+
+
+
+    public function user(Request $request): JsonResponse
     {
 
-        $request->validate([
-            'user_id'   => 'required|integer',
-            'code'      => 'required|integer',
-        ]);
-
-        $userId = $request->user_id;
-        $code = $request->code;
-
-        $cachedCode = Cache::get('2fa_code_'.$userId);
-
-        if(!$cachedCode || $cachedCode != $code){
-
-            return response()->json(['message' => __('validation.invalid_2fa_code')], 401);
-
-        }
-
-        Cache::forget('2fa_code_'.$userId);
-
-        $user = User::find($userId);
-
-        Auth::login($user);
-
-        return response()->json([
-            'authenticated' => true,
-            'userId' => $userId
-        ]);
-
-    }
-
-    public function resend2FACode(Request $request): JsonResponse
-    {
-
-        $request->validate([
-            'user_id' => 'required|integer',
-        ]);
-
-        $user = User::find($request->user_id);
-
-        if(!$user){
-
-            return response()->json(['message' => 'User not found'], 404);
-
-        }
-
-        $code = random_int(100000, 999999);
-
-        Cache::put('2fa_code_'.$user->id, $code, 600);
-
-        Mail::to($user->email)->send(new TwoFactorCodeMail($code));
-
-        return response()->json(['message' => __('messages.MESS_29')]);
-
-    }
-
-    public function logout(Request $request): JsonResponse
-    {
-
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(true);
+        return response()->json($request->user());
 
     }
 
     public function checkAuthenticated(): JsonResponse
     {
 
-        $status = Auth::check();
+        if(Auth::user()){
 
-        return response()->json([
-            'errors' => [
-                (!$status ? 'User not authenticated' : null)
-            ],
-            'data' => [
-                'authenticated' => $status,
-                'userId' => Auth::id()
-            ]
-        ]);
+            return $this->successResponse('',200, ['success' => true]);
+
+        }
+
+        return $this->errorResponse('', 401, [], 'SYSTEM ERROR');
 
     }
 
-    public function user(Request $request): JsonResponse
+    private function successResponse(string|array $message, int $status, array $data = [], string $type = 'STANDARD_SUCCESS'): JsonResponse
     {
 
-        return response()->json($request->user());
+        return response()->json([
+            'success' => [
+                'type' => $type,
+                'messages' => is_array($message) ? $message : [$message],
+                'data' => $data
+            ]
+        ], $status);
+
+    }
+
+    private function errorResponse(string|array $message, int $status, array $data = [], string $type = 'STANDARD_ERROR'): JsonResponse
+    {
+
+        return response()->json([
+            'errors' => [
+                'type' => $type,
+                'messages' => is_array($message) ? $message : [$message],
+                'data' => $data
+            ]
+        ], $status);
 
     }
 

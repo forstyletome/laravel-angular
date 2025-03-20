@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {ResponseErrors} from '../../models/error.service';
-import {HttpErrorResponse} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -9,62 +8,143 @@ import {HttpErrorResponse} from '@angular/common/http';
 
 export class ErrorService{
 
-  private errorsSubject:BehaviorSubject<ResponseErrors> = new BehaviorSubject<ResponseErrors>({});
+  private errorsSubject:BehaviorSubject<ResponseErrors> = new BehaviorSubject<ResponseErrors>(
+    {
+      data: {},
+      messages: {},
+      type: '',
+      status:0
+    }
+  );
 
   errors$:Observable<ResponseErrors> = this.errorsSubject.asObservable();
 
-  public setErrors(errors: ResponseErrors):void {
+  private errorsSystemSubject:BehaviorSubject<ResponseErrors> = new BehaviorSubject<ResponseErrors>(
+    {
+      data: {},
+      messages: {},
+      type: '',
+      status: 0
+    }
+  );
 
-    this.errorsSubject.next(errors);
+  errorsSystem$:Observable<ResponseErrors> = this.errorsSystemSubject.asObservable();
 
-  }
+  public setErrors(errors: ResponseErrors, type: string):void {
 
-  public clearErrors():void {
+    switch(type){
 
-    this.errorsSubject.next({});
+      case 'STANDARD_ERROR':
 
-  }
+        this.errorsSubject.next(errors);
 
-  hasError(key: string): boolean{
+      break;
 
-    const errors:ResponseErrors = this.errorsSubject.value;
+      case 'SYSTEM_ERROR':
 
-    return !!errors[key];
-
-  }
-
-  getError(key: string): string | undefined {
-
-    const errors:ResponseErrors = this.errorsSubject.value;
-
-    return errors[key];
-
-  }
-
-  getErrors(): string[] | undefined {
-    return Object.keys(this.errorsSubject.value);
-  }
-
-  setAnotherErrors(error:string|object, status:number):void {
-
-    console.log(error);
-    console.log(status);
-
-      //this.errorsSubject.next(errors);
-
-  }
-
-  anotherError(error:HttpErrorResponse):void{
-
-    switch (error.status) {
-
-      case 419:
-
-        this.setAnotherErrors(error.error.message, error.status);
+        this.errorsSystemSubject.next(errors);
 
       break;
 
     }
+
+  }
+
+  public clearErrors(type: string):void {
+
+    switch(type){
+
+      case 'STANDARD_ERROR':
+
+        this.errorsSubject.next({
+          data: {},
+          messages: {},
+          type: '',
+          status: 0
+        });
+
+      break;
+
+      case 'SYSTEM_ERROR':
+
+        this.errorsSystemSubject.next({
+          data: {},
+          messages: {},
+          type: '',
+          status: 0
+        });
+
+      break;
+
+    }
+
+  }
+
+  hasError(key: string, type: string): boolean{
+
+    switch(type){
+
+      case 'STANDARD_ERROR':
+
+        return !!this.errorsSubject.value.messages[key];
+
+      break;
+
+      case 'SYSTEM_ERROR':
+
+        return !!this.errorsSystemSubject.value.messages[key];
+
+      break;
+
+    }
+
+    return false;
+
+  }
+
+  getError(key: string, type: string): string | undefined {
+
+    switch(type){
+
+      case 'STANDARD_ERROR':
+
+        return this.errorsSubject.value.messages[key];
+
+      break;
+
+      case 'SYSTEM_ERROR':
+
+        return this.errorsSystemSubject.value.messages[key];
+
+      break;
+
+    }
+
+    return '';
+
+  }
+
+  getErrors(type: string): string[] | undefined {
+
+    //console.log(Object.keys(this.errorsSubject.value.messages));
+
+    switch(type){
+
+      case 'STANDARD_ERROR':
+
+        return Object.keys(this.errorsSubject.value.messages);
+
+      break;
+
+      case 'SYSTEM_ERROR':
+
+        return Object.keys(this.errorsSystemSubject.value.messages);
+
+      break;
+
+    }
+
+    return [];
 
   }
 

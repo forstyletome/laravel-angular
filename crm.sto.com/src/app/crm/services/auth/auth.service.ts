@@ -2,7 +2,19 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import {ConfigService} from '../config/config.service';
-import {AuthResponse, ForgotPasswordResponse, GetUserResponse, LoginResponse, LogoutResponse, RegisterData, RegisterResponse, resend2FAResponse, ResetPasswordData, ResetPasswordResponse, User, VerifyResponse, VerifyTwoFactorCodeResponse
+import {
+  ForgotPasswordResponse,
+  LoginResponse,
+  LogoutResponse,
+  RegisterData,
+  RegisterResponse,
+  resend2FAResponse,
+  ResetPasswordData,
+  ResetPasswordResponse,
+  User, UserPermission,
+  UserRole,
+  VerifyResponse,
+  VerifyTwoFactorCodeResponse
 } from '../../models/auth.service';
 
 @Injectable({
@@ -14,27 +26,34 @@ export class AuthService {
   public isAuthenticatedSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   isAuthenticated$:Observable<boolean> = this.isAuthenticatedSubject.asObservable();
 
-  public userIdSubject:BehaviorSubject<number> = new BehaviorSubject<number>(0);
-  userId$:Observable<number> = this.userIdSubject.asObservable();
+  public userSubject:BehaviorSubject<User> = new BehaviorSubject<User>({id:0, name:'', email:''});
+  user$:Observable<User> = this.userSubject.asObservable();
 
-  public userSubject:BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
-  user$:Observable<User | null> = this.userSubject.asObservable();
+  public userRoleSubject:BehaviorSubject<UserRole> = new BehaviorSubject<UserRole>({roles: []});
+  userRole$:Observable<UserRole> = this.userRoleSubject.asObservable();
+
+  public userPermissionSubject:BehaviorSubject<UserPermission> = new BehaviorSubject<UserPermission>({permissions: []});
+  userPermission$:Observable<UserPermission> = this.userPermissionSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private configService: ConfigService
   ){}
 
-  setAuthenticationStatus(status: boolean): void {
+  setAuthentication(status: boolean): void {
     this.isAuthenticatedSubject.next(status);
   }
 
-  setUserIdStatus(userId: number): void {
-    this.userIdSubject.next(userId);
+  setUser(user: User): void {
+    this.userSubject.next(user);
   }
 
-  setUserStatus(user: User | null): void {
-    this.userSubject.next(user);
+  setUserRole(roles: string[]): void {
+    this.userRoleSubject.next({roles});
+  }
+
+  setUserPermission(permissions: string[]): void {
+    this.userPermissionSubject.next({permissions});
   }
 
   async initializeCsrf(): Promise<void>{
@@ -43,9 +62,9 @@ export class AuthService {
 
   }
 
-  async checkAuth(): Promise<AuthResponse>{
+  async checkAuth(): Promise<object>{
 
-    return await firstValueFrom(this.http.get<AuthResponse>(this.configService.apiUrl + this.configService.apiPrefix + this.configService.checkAuthUrl, {
+    return await firstValueFrom(this.http.get(this.configService.apiUrl + this.configService.apiPrefix + this.configService.checkAuthUrl, {
         withCredentials: true
       }));
 
@@ -117,19 +136,19 @@ export class AuthService {
 
   }
 
-  async verifyTwoFactorCode(user_id: number, code: string): Promise<VerifyTwoFactorCodeResponse> {
+  async verifyTwoFactorCode(email: string, code: string): Promise<VerifyTwoFactorCodeResponse> {
 
     return await firstValueFrom(this.http.post<VerifyTwoFactorCodeResponse>(
         this.configService.apiUrl + this.configService.apiPrefix + this.configService.verify2FACodeUrl,
-        { user_id, code: code },
+        { email, code: code },
         { withCredentials: true}
       ));
 
   }
 
-  async resend2FA(userId: number): Promise<resend2FAResponse> {
+  async resend2FA(email: string, countdown: number): Promise<resend2FAResponse> {
 
-    return await firstValueFrom(this.http.post<resend2FAResponse>(this.configService.apiUrl + this.configService.apiPrefix + this.configService.resend2FACodeUrl, { user_id: userId }, { withCredentials: true }));
+    return await firstValueFrom(this.http.post<resend2FAResponse>(this.configService.apiUrl + this.configService.apiPrefix + this.configService.resend2FACodeUrl, { email: email, countdown: countdown }, { withCredentials: true }));
 
   }
 
@@ -139,9 +158,9 @@ export class AuthService {
 
   }
 
-  async getUser(): Promise<GetUserResponse>{
+  async getUser(): Promise<User>{
 
-    return await firstValueFrom(this.http.get<GetUserResponse>(this.configService.apiUrl + this.configService.apiPrefix + this.configService.userUrl, { withCredentials: true }));
+    return await firstValueFrom(this.http.get<User>(this.configService.apiUrl + this.configService.apiPrefix + this.configService.userUrl, { withCredentials: true }));
 
   }
 

@@ -1,4 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
@@ -27,9 +27,14 @@ import {ErrorService} from '../../services/errors/error.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
-export class ForgotPasswordComponent implements OnInit{
+export class ForgotPasswordComponent implements OnInit, OnDestroy{
 
-  public errors: ResponseErrors = {};
+  public errors: ResponseErrors = {
+    data: {},
+    messages: {},
+    type: '',
+    status: 0
+  };
 
   public email: string = '';
   public token: string = '';
@@ -40,6 +45,8 @@ export class ForgotPasswordComponent implements OnInit{
   public resetPasswordConfirmedMessage:object = {};
 
   public showHidePassword:boolean = false;
+
+  protected readonly Object: ObjectConstructor = Object;
 
   constructor(
     private styleService: StyleService,
@@ -67,21 +74,9 @@ export class ForgotPasswordComponent implements OnInit{
 
   }
 
-  protected hasError(key: string): boolean {
-
-    return this.errorService.hasError(key);
-
-  }
-
-  protected getErrors(): string[] | undefined {
-
-    return this.errorService.getErrors();
-
-  }
-
   protected async resetPassword(): Promise<void>{
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
     const data: ResetPasswordData = {
       email: this.email,
@@ -92,12 +87,24 @@ export class ForgotPasswordComponent implements OnInit{
 
     const resetPassword: ResetPasswordResponse = await this.authService.resetPassword(data);
 
-    if(resetPassword.status){
+    if(resetPassword.success.data.success){
 
       this.resetPasswordConfirmed = true;
-      this.resetPasswordConfirmedMessage = resetPassword.message;
+      this.resetPasswordConfirmedMessage = resetPassword.success.messages;
 
     }
+
+  }
+
+  protected hasError(key: string): boolean {
+
+    return this.errorService.hasError(key, 'STANDARD_ERROR');
+
+  }
+
+  protected getErrors(): string[] | undefined {
+
+    return this.errorService.getErrors('STANDARD_ERROR');
 
   }
 
@@ -109,7 +116,7 @@ export class ForgotPasswordComponent implements OnInit{
 
   ngOnDestroy(): void {
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
   }
 

@@ -1,9 +1,9 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
 import {AuthService} from '../../services/auth/auth.service';
 import {Router} from '@angular/router';
 import {StyleService} from '../../services/style/style.service';
 import {NgClass} from '@angular/common';
-import {User} from '../../models/auth.service';
+import {LogoutResponse, User} from '../../models/auth.service';
 
 @Component({
   selector: 'app-user-mini',
@@ -15,7 +15,8 @@ import {User} from '../../models/auth.service';
   styleUrl: './user-mini.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class UserMiniComponent {
+
+export class UserMiniComponent implements OnInit{
 
   public userName:string = '';
   public role:string = '';
@@ -29,11 +30,11 @@ export class UserMiniComponent {
 
   ngOnInit():void {
 
-    this.authService.user$.subscribe((data:User | null):void => {
+    this.authService.user$.subscribe((response:User):void => {
 
-      if(data){
+      if(response.id > 0){
 
-        this.userName = data.name;
+        this.userName = response.name;
 
       }
 
@@ -43,13 +44,20 @@ export class UserMiniComponent {
 
   logout(){
 
-    this.authService.logout().then((data):void => {
+    this.authService.logout().then((response: LogoutResponse):void => {
 
-      if(data){
+      if(response.success.data.success){
 
-        this.authService.setAuthenticationStatus(false);
-        this.authService.setUserStatus(null);
-        this.authService.setUserIdStatus(0);
+        const user: User = {
+          id: 0,
+          name: '',
+          email: ''
+        };
+
+        this.authService.setAuthentication(false);
+        this.authService.setUser(user);
+        this.authService.setUserRole([]);
+        this.authService.setUserPermission([]);
 
         this.styleService.setBodyClass('');
 
@@ -66,4 +74,5 @@ export class UserMiniComponent {
     this.showPanel = !this.showPanel;
 
   }
+
 }

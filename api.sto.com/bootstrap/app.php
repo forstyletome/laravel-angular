@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ExceptionResponse;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,12 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->append(SetLocale::class);
         $middleware->alias([
-            'locale' => SetLocale::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        //
-    })->create();
+    ->withExceptions(fn (Exceptions $exceptions) => ExceptionResponse::register($exceptions))
+    ->create();

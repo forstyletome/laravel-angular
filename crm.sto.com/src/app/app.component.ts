@@ -1,4 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {AuthService} from './crm/services/auth/auth.service';
 import {NgIf} from '@angular/common';
@@ -7,7 +7,7 @@ import {HeaderComponent} from './crm/components/header/header.component';
 import {SidebarComponent} from './crm/components/sidebar/sidebar.component';
 import {TranslationService} from './crm/services/languages/translation.service';
 import {ConfigService} from './crm/services/config/config.service';
-import {AuthResponse} from './crm/models/auth.service';
+import {SystemAlertsComponent} from './crm/components/system-alerts/system-alerts.component';
 
 @Component({
   selector: 'app-root',
@@ -15,14 +15,15 @@ import {AuthResponse} from './crm/models/auth.service';
     RouterOutlet,
     NgIf,
     HeaderComponent,
-    SidebarComponent
+    SidebarComponent,
+    SystemAlertsComponent
   ],
   templateUrl: './app.component.html',
   standalone: true,
   styleUrl: './app.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
 
   public authenticated:boolean = false;
   public bodyClass: string = '';
@@ -41,9 +42,17 @@ export class AppComponent {
     await this.authService.initializeCsrf();
     await this.translationService.loadTranslations();
 
-    const checkAuth: AuthResponse = await this.authService.checkAuth();
+    try{
 
-    this.authService.setAuthenticationStatus(checkAuth.data.authenticated);
+      await this.authService.checkAuth();
+
+      this.authService.setAuthentication(true);
+
+    }catch(error){
+
+      this.authService.setAuthentication(false);
+
+    }
 
     this.styleService.sideBarClassSubject$.subscribe(
       (className: string): void => {

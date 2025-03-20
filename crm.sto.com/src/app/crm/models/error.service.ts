@@ -1,3 +1,10 @@
 export interface ResponseErrors {
-  [key: string]: string;
+  data: {
+    [key: string]: any
+  },
+  messages: {
+    [key: string]: string
+  },
+  type: string,
+  status: number
 }

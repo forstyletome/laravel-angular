@@ -13,15 +13,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
     catchError((error: HttpErrorResponse) => {
 
-      if(error.error && error.error.errors){
+      console.log(error);
 
-        errorService.setErrors(error.error.errors);
+      const errors = {
+        data: error.error.errors.data,
+        messages: error.error.errors.messages,
+        type: error.error.errors.type,
+        status: error.status
+      };
 
-      }else{
-
-        errorService.anotherError(error);
-
-      }
+      errorService.setErrors(errors, error.error.errors.type);
 
       return throwError(() => '');
 
@@ -29,4 +30,4 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   );
 
-};
+}

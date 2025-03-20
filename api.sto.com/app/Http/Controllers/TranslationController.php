@@ -32,7 +32,7 @@ class TranslationController extends Controller
             }
         }
 
-        Log::debug(print_r($translations, true));
+        //Log::debug(print_r($translations, true));
 
         return response()->json($translations);
 

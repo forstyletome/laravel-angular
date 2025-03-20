@@ -54,10 +54,10 @@
 
         </div>
 
-        <div class="d-flex flex-column gap-2 mt-20" *ngIf="errors">
+        <div class="d-flex flex-column gap-2 mt-20" *ngIf="Object.keys(errors.messages).length > 0">
 
           <div class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
-            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors[key] }}</span>
+            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors.messages[key] }}</span>
           </div>
 
         </div>
@@ -108,10 +108,10 @@
 
         </div>
 
-        <div class="d-flex flex-column gap-2 mt-20" *ngIf="errors">
+        <div class="d-flex flex-column gap-2 mt-20" *ngIf="Object.keys(errors.messages).length > 0">
 
           <div class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
-            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors[key] }}</span>
+            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors.messages[key] }}</span>
           </div>
 
         </div>
@@ -142,12 +142,13 @@
         <div class="mb-16">
 
           <input [(ngModel)]="code" type="text" placeholder="{{ 'MESS_16' | translate }}" class="form-control h-56-px bg-neutral-50 radius-12" name="code">
+
         </div>
 
-        <div class="d-flex flex-column gap-2 mt-20 mb-20" *ngIf="errors">
+        <div class="d-flex flex-column gap-2 mt-20 mb-20" *ngIf="Object.keys(errors.messages).length > 0">
 
           <div class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
-            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors[key] }}</span>
+            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors.messages[key] }}</span>
           </div>
 
         </div>
@@ -161,7 +162,7 @@
         <p *ngIf="countdown > 0" class="mb-32 text-secondary-light text-lg text-center mt-20">{{ 'MESS_27' | translate }}{{ countdown }}{{ 'MESS_28' | translate }}</p>
 
         <div class="mt-120 text-center text-sm">
-          <p class="mb-0">{{ 'MESS_26' | translate }} <a [routerLink]="'/login'" class="text-primary-600 fw-semibold">{{ 'MESS_10' | translate }}</a></p>
+          <p class="mb-0">{{ 'MESS_26' | translate }} <a (click)="backToLoginForm()" class="text-primary-600 fw-semibold">{{ 'MESS_10' | translate }}</a></p>
         </div>
 
       </form>

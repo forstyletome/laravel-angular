@@ -1,4 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../../services/auth/auth.service';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
@@ -32,7 +32,7 @@ import {ConfigService} from '../../services/config/config.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
-export class LoginComponent implements OnInit{
+export class LoginComponent implements OnInit, OnDestroy{
 
   public email:string = '';
   public password:string = '';
@@ -43,13 +43,20 @@ export class LoginComponent implements OnInit{
   public countdown: number = 0;
   public interval: any;
 
-  public errors: ResponseErrors = {};
+  public errors: ResponseErrors = {
+    data: {},
+    messages: {},
+    type: '',
+    status: 0
+  };
 
-  public showHidePassword:boolean = false;
-  public showHideForgotPasswordForm:boolean = false;
+  public showHidePassword: boolean = false;
+  public showHideForgotPasswordForm: boolean = false;
 
-  public codeResented:boolean = false;
-  public codeResentedText:string = '';
+  public codeResented: boolean = false;
+  public codeResentedText: string = '';
+
+  protected readonly Object: ObjectConstructor = Object;
 
   ngOnInit():void {
 
@@ -73,30 +80,46 @@ export class LoginComponent implements OnInit{
 
   protected async login(): Promise<void>{
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
-    const response: LoginResponse = await this.authService.login(this.email, this.password);
+    await this.authService.login(this.email, this.password).then((response: LoginResponse):void => {
 
-    if(response.data.user_id > 0){
+      if(response.success.data.success){
 
-      this.authService.setUserIdStatus(response.data.user_id);
-      this.requires2FA = true;
+        this.requires2FA = true;
 
-      this.errorService.clearErrors();
+        this.countdown = 60;
 
-    }
+        this.interval = setInterval(():void => {
+
+          this.countdown--;
+
+          if(this.countdown === 0){
+
+            clearInterval(this.interval);
+
+          }
+
+        }, 1000);
+
+      }
+
+    })
 
   }
 
   protected async verify2FA(): Promise<void>{
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
-    await this.authService.verifyTwoFactorCode(this.authService.userIdSubject.value, this.code).then((data:VerifyTwoFactorCodeResponse):void => {
+    await this.authService.verifyTwoFactorCode(this.email, this.code).then((response:VerifyTwoFactorCodeResponse):void => {
 
-        if(data.authenticated){
+        if(response.success.data.user.id > 0){
 
-          this.authService.setAuthenticationStatus(data.authenticated);
+          this.authService.setAuthentication(true);
+          this.authService.setUser(response.success.data.user);
+          this.authService.setUserRole(response.success.data.roles);
+          this.authService.setUserPermission(response.success.data.permissions);
 
           this.styleService.setBodyClass('');
 
@@ -110,12 +133,12 @@ export class LoginComponent implements OnInit{
 
   protected async resendCode(): Promise<void> {
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
     this.codeResented = false;
 
     this.code = '';
-    this.countdown = 30;
+    this.countdown = 60;
 
     this.interval = setInterval(():void => {
 
@@ -129,13 +152,12 @@ export class LoginComponent implements OnInit{
 
     }, 1000);
 
-    await this.authService.resend2FA(this.authService.userIdSubject.value).then(
-      (data:resend2FAResponse): void => {
+    await this.authService.resend2FA(this.email, this.countdown).then((response:resend2FAResponse): void => {
 
         this.codeResented  = true;
-        this.codeResentedText = data.message;
+        this.codeResentedText = response.success.messages;
 
-      });
+    });
 
   }
 
@@ -147,7 +169,7 @@ export class LoginComponent implements OnInit{
 
   protected forgotPasswordForm():void{
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
     this.email = '';
     this.password = '';
@@ -158,13 +180,13 @@ export class LoginComponent implements OnInit{
 
   protected async forgotPassword():Promise<void> {
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
     await this.authService.forgotPassword(this.email).then(
 
-      (data:ForgotPasswordResponse):void => {
+      (response:ForgotPasswordResponse):void => {
 
-        if(data.status){
+        if(response.success.data.success){
 
           this.router.navigate([this.configService.forgotPasswordUrl]);
 
@@ -178,30 +200,31 @@ export class LoginComponent implements OnInit{
 
   protected hasError(key: string): boolean {
 
-    return this.errorService.hasError(key);
+    return this.errorService.hasError(key, 'STANDARD_ERROR');
 
   }
 
   protected getErrors(): string[] | undefined {
 
-    return this.errorService.getErrors();
+    return this.errorService.getErrors('STANDARD_ERROR');
 
   }
 
   protected backToLoginForm():void{
 
     this.showHideForgotPasswordForm = false;
+    this.requires2FA = false;
 
     this.email = '';
     this.password = '';
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
   }
 
   ngOnDestroy(): void {
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
   }
 

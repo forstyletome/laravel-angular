@@ -37,7 +37,12 @@ export class RegisterComponent implements OnInit{
 
   public registrationSuccess:boolean = false;
 
-  public errors: ResponseErrors = {};
+  public errors: ResponseErrors = {
+    data: {},
+    messages: {},
+    type: '',
+    status: 0
+  };
 
   public showHidePassword:boolean = false;
 
@@ -60,11 +65,11 @@ export class RegisterComponent implements OnInit{
   ){}
 
   protected hasError(key: string): boolean {
-    return this.errorService.hasError(key);
+    return this.errorService.hasError(key, 'STANDARD_ERROR');
   }
 
   protected getErrors(): string[] | undefined {
-    return this.errorService.getErrors();
+    return this.errorService.getErrors('STANDARD_ERROR');
   }
 
   protected togglePassword():void{
@@ -75,7 +80,7 @@ export class RegisterComponent implements OnInit{
 
   protected async register():Promise<void>{
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
     const data: RegisterData = {
       name: this.name,
@@ -91,9 +96,9 @@ export class RegisterComponent implements OnInit{
 
       this.registrationSuccess = true;
 
-      this.authService.setUserIdStatus(response.data.id);
+      //this.authService.setUserIdStatus(response.data.id);
 
-      this.errorService.clearErrors();
+      this.errorService.clearErrors('STANDARD_ERROR');
 
     }
 
@@ -101,7 +106,7 @@ export class RegisterComponent implements OnInit{
 
   ngOnDestroy(): void {
 
-    this.errorService.clearErrors();
+    this.errorService.clearErrors('STANDARD_ERROR');
 
   }
 
