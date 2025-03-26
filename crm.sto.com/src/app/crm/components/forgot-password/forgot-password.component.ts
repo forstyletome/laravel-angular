@@ -98,13 +98,13 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy{
 
   protected hasError(key: string): boolean {
 
-    return this.errorService.hasError(key, 'STANDARD_ERROR');
+    return !!this.errors.messages[key];
 
   }
 
-  protected getErrors(): string[] | undefined {
+  protected getErrors(): string[] {
 
-    return this.errorService.getErrors('STANDARD_ERROR');
+    return Object.keys(this.errors.messages);
 
   }
 

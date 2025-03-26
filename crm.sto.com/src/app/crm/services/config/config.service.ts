@@ -21,6 +21,7 @@ export class ConfigService{
   forgotPasswordUrl: string = '/forgot-password';
   resetPasswordUrl: string = '/reset-password';
   verify2FACodeUrl: string = '/verify-2fa';
+  resendVerifyEmail: string = '/resend-verify-email';
   resend2FACodeUrl: string = '/resend-2fa';
   logoutUrl: string = '/logout';
   userUrl: string = '/user';

@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import {ConfigService} from '../config/config.service';
 import {Translations} from '../../models/translation.service';
+import {ErrorService} from '../errors/error.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,8 @@ export class TranslationService{
   constructor(
     private http: HttpClient,
     private translate: TranslateService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private errorService: ErrorService
   ){}
 
   async loadTranslations(): Promise<void> {
@@ -45,6 +47,9 @@ export class TranslationService{
   }
 
   setCurrentLanguage(language: string): void {
+
+    this.errorService.clearErrors('STANDARD_ERROR');
+    this.errorService.clearErrors('SYSTEM_ERROR');
 
     localStorage.setItem(this.storageKey, language);
 

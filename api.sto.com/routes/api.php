@@ -8,6 +8,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::post('/resend-verify-email', [AuthController::class, 'resendVerifyEmail'])->name('verification.resend');
 
 //Route::middleware(['auth:sanctum', 'verified'])->get('/protected-route', [AuthController::class, 'protectedRoute']);
 
@@ -20,6 +21,6 @@ Route::post('/resend-2fa', [AuthController::class, 'resend2FACode']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
 
 Route::get('/check-auth', [AuthController::class, 'checkAuthenticated']);
-Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
+//Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
 
 Route::get('/translations', [TranslationController::class, 'getAllTranslations']);

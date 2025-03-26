@@ -31,8 +31,6 @@ class ExceptionResponse
 
             }
 
-            return $response;
-
         });
 
     }

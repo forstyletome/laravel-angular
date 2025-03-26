@@ -4,4 +4,6 @@ import { AppComponent } from './app/app.component';
 import '@iconify/iconify';
 
 bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+  .catch(
+    (err) => console.error(err)
+);

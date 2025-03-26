@@ -102,7 +102,7 @@ export class ErrorService{
 
   }
 
-  getError(key: string, type: string): string | undefined {
+  getError(key: string, type: string): string{
 
     switch(type){
 
@@ -124,27 +124,30 @@ export class ErrorService{
 
   }
 
-  getErrors(type: string): string[] | undefined {
-
-    //console.log(Object.keys(this.errorsSubject.value.messages));
+  getErrors(type: string): ResponseErrors {
 
     switch(type){
 
       case 'STANDARD_ERROR':
 
-        return Object.keys(this.errorsSubject.value.messages);
+        return this.errorsSubject.value;
 
       break;
 
       case 'SYSTEM_ERROR':
 
-        return Object.keys(this.errorsSystemSubject.value.messages);
+        return this.errorsSystemSubject.value;
 
       break;
 
     }
 
-    return [];
+    return {
+      data: {},
+      messages: {},
+      type: '',
+      status: 0
+    };
 
   }
 

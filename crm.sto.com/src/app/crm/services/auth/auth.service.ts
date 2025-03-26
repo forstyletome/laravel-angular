@@ -9,6 +9,7 @@ import {
   RegisterData,
   RegisterResponse,
   resend2FAResponse,
+  ResendVerifyEmailResponse,
   ResetPasswordData,
   ResetPasswordResponse,
   User, UserPermission,
@@ -99,7 +100,7 @@ export class AuthService {
 
   async verifyEmail(id: number, hash: string, expires: number): Promise<VerifyResponse> {
 
-    const url:string = `${this.configService.apiUrl + this.configService.apiPrefix + this.configService.verifyEmailUrl}?id=${id}&hash=${hash}&expires=${expires}`;
+    const url:string = this.configService.apiUrl + this.configService.apiPrefix + this.configService.verifyEmailUrl + '?id=' + id + '&hash=' + hash + '&expires=' + expires;
 
     return await firstValueFrom(this.http.get<VerifyResponse>(
         url,
@@ -107,6 +108,20 @@ export class AuthService {
           withCredentials: true
         }
       ));
+
+  }
+
+  async resendVerifyEmail(email: string): Promise<ResendVerifyEmailResponse> {
+
+    return await firstValueFrom(this.http.post<ResendVerifyEmailResponse>(
+      this.configService.apiUrl + this.configService.apiPrefix + this.configService.resendVerifyEmail,
+      {
+        email
+      },
+      {
+        withCredentials: true
+      }
+    ));
 
   }
 

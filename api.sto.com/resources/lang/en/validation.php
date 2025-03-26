@@ -29,5 +29,7 @@ return [
         'hash' => 'Hash',
         'id' => 'ID'
     ],
+    'broken_link' => 'Invalid link',
+    'success_email' => 'Congratulations! You have successfully confirmed your email address. Please log in using your email and password.'
 ];
 ?>

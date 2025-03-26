@@ -6,8 +6,9 @@ import {StyleService} from './crm/services/style/style.service';
 import {HeaderComponent} from './crm/components/header/header.component';
 import {SidebarComponent} from './crm/components/sidebar/sidebar.component';
 import {TranslationService} from './crm/services/languages/translation.service';
-import {ConfigService} from './crm/services/config/config.service';
 import {SystemAlertsComponent} from './crm/components/system-alerts/system-alerts.component';
+import {ResponseErrors} from './crm/models/error.service';
+import {ErrorService} from './crm/services/errors/error.service';
 
 @Component({
   selector: 'app-root',
@@ -28,17 +29,17 @@ export class AppComponent implements OnInit{
   public authenticated:boolean = false;
   public bodyClass: string = '';
   public sideBarActive:string = '';
+  public showHideSystemErrors: boolean = false;
 
   constructor(
     private authService: AuthService,
     private styleService: StyleService,
     private translationService: TranslationService,
-    private configService: ConfigService
+    private errorService: ErrorService
   ) {}
 
   async ngOnInit():Promise<void> {
 
-    await this.configService.init();
     await this.authService.initializeCsrf();
     await this.translationService.loadTranslations();
 
@@ -77,6 +78,12 @@ export class AppComponent implements OnInit{
 
       }
     );
+
+    this.errorService.errorsSystem$.subscribe((errors:ResponseErrors):void => {
+
+      this.showHideSystemErrors = errors.status > 0;
+
+    });
 
   }
 

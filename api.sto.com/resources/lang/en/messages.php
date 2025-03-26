@@ -33,7 +33,7 @@ return [
     'MESS_31' => 'Please enter your details to register',
     'MESS_32' => 'Sign Up',
     'MESS_33' => 'Your name',
-    //'MESS_34' => 'Your password must have at least 8 characters',
+    'MESS_34' => 'Confirm your email',
     'MESS_35' => 'By creating an account means you agree to the',
     'MESS_36' => 'Terms & Conditions',
     'MESS_37' => ' and our',
@@ -42,5 +42,7 @@ return [
     'MESS_40' => 'A link to confirm account activation has been sent to your email. Please follow the link to successfully activate your account.',
     'MESS_41' => 'Confirmation of registration',
     'MESS_42' => 'Successful confirmation of registration',
+    'MESS_43' => 'Send a letter',
+    'MESS_44' => 'Resend the letter',
 ];
 ?>

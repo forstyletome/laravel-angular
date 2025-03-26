@@ -1,4 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {LanguageSwitcherComponent} from "../language-switcher/language-switcher.component";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
@@ -27,7 +27,7 @@ import {ErrorService} from '../../services/errors/error.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
-export class RegisterComponent implements OnInit{
+export class RegisterComponent implements OnInit, OnDestroy{
 
   public email:string = '';
   public password:string = '';
@@ -45,6 +45,8 @@ export class RegisterComponent implements OnInit{
   };
 
   public showHidePassword:boolean = false;
+
+  protected readonly Object: ObjectConstructor = Object;
 
   ngOnInit():void {
 
@@ -64,20 +66,6 @@ export class RegisterComponent implements OnInit{
     private errorService: ErrorService,
   ){}
 
-  protected hasError(key: string): boolean {
-    return this.errorService.hasError(key, 'STANDARD_ERROR');
-  }
-
-  protected getErrors(): string[] | undefined {
-    return this.errorService.getErrors('STANDARD_ERROR');
-  }
-
-  protected togglePassword():void{
-
-    this.showHidePassword = !this.showHidePassword;
-
-  }
-
   protected async register():Promise<void>{
 
     this.errorService.clearErrors('STANDARD_ERROR');
@@ -92,15 +80,29 @@ export class RegisterComponent implements OnInit{
 
     const response: RegisterResponse = await this.authService.register(data);
 
-    if(response.success){
+    if(response.success.data.success){
 
       this.registrationSuccess = true;
 
-      //this.authService.setUserIdStatus(response.data.id);
-
-      this.errorService.clearErrors('STANDARD_ERROR');
-
     }
+
+  }
+
+  protected hasError(key: string): boolean {
+
+    return !!this.errors.messages[key];
+
+  }
+
+  protected getErrors(): string[] {
+
+    return Object.keys(this.errors.messages);
+
+  }
+
+  protected togglePassword():void{
+
+    this.showHidePassword = !this.showHidePassword;
 
   }
 

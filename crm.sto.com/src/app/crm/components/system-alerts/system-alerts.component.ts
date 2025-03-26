@@ -1,7 +1,7 @@
 import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
 import {ResponseErrors} from '../../models/error.service';
 import {ErrorService} from '../../services/errors/error.service';
-import {NgForOf, NgIf} from '@angular/common';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {AuthService} from '../../services/auth/auth.service';
 import {withLatestFrom} from 'rxjs';
 import {ConfigService} from '../../services/config/config.service';
@@ -10,7 +10,8 @@ import {ConfigService} from '../../services/config/config.service';
   selector: 'app-system-alerts',
   imports: [
     NgForOf,
-    NgIf
+    NgIf,
+    NgClass
   ],
   templateUrl: './system-alerts.component.html',
   styleUrl: './system-alerts.component.scss',
@@ -27,7 +28,7 @@ export class SystemAlertsComponent implements OnInit{
     status: 0
   };
 
-  public authenticated:boolean = false;
+  protected readonly Object: ObjectConstructor = Object;
 
   ngOnInit(): void {
 
@@ -50,7 +51,6 @@ export class SystemAlertsComponent implements OnInit{
         }
 
         this.errors = errors;
-        this.authenticated = authenticated;
 
       });
 
@@ -62,12 +62,16 @@ export class SystemAlertsComponent implements OnInit{
     private configService: ConfigService
   ){}
 
-  protected getErrors(): string[] | undefined {
+  protected closeWindow(): void{
 
-    return this.errorService.getErrors('SYSTEM_ERROR');
+    this.errorService.clearErrors('SYSTEM_ERROR');
 
   }
 
-  protected readonly Object = Object;
+  protected getErrors(): string[] {
+
+    return Object.keys(this.errors.messages);
+
+  }
 
 }

@@ -36,23 +36,6 @@ export interface UserPermission{
   permissions: string[]
 }
 
-
-
-
-export interface RegisterResponse {
-  success: boolean,
-  data: {
-    id: number
-  },
-  errors: string[]
-}
-
-export interface VerifyResponse {
-  message: string;
-}
-
-
-
 export interface ResetPasswordResponse {
   success:{
     messages: {
@@ -66,6 +49,9 @@ export interface ResetPasswordResponse {
 
 export interface ForgotPasswordResponse {
   success:{
+    messages: {
+      [key: string]: string
+    },
     data:{
       success: boolean
     }
@@ -79,23 +65,11 @@ export interface VerifyTwoFactorCodeResponse {
       [key: string]: string
     },
     data: {
-      user: {
-        id: number,
-        name: string,
-        email: string
-      },
+      user: User,
       roles: string[],
       permissions: string[]
     }
   }
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-  policy: boolean;
 }
 
 export interface ResetPasswordData {
@@ -109,4 +83,42 @@ export interface User {
   id: number;
   name: string;
   email: string;
+}
+
+
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  policy: boolean;
+}
+
+export interface RegisterResponse {
+  success:{
+    data:{
+      success: boolean
+    }
+  }
+}
+
+export interface VerifyResponse {
+  success:{
+    messages: {
+      [key: string]: string
+    },
+    data:{
+      success: boolean
+    }
+  }
+}
+
+export interface ResendVerifyEmailResponse {
+  success:{
+    messages: string,
+    data:{
+      success: boolean
+    }
+  }
 }

@@ -53,6 +53,8 @@ export class LoginComponent implements OnInit, OnDestroy{
   public showHidePassword: boolean = false;
   public showHideForgotPasswordForm: boolean = false;
 
+  public showHideResendLink: boolean = false;
+
   public codeResented: boolean = false;
   public codeResentedText: string = '';
 
@@ -104,7 +106,18 @@ export class LoginComponent implements OnInit, OnDestroy{
 
       }
 
-    })
+    }).catch(error => {
+
+      if(
+        error.error.errors.data.showHideResendLink != undefined &&
+        error.error.errors.data.showHideResendLink
+      ){
+
+        this.showHideResendLink = true;
+
+      }
+
+    });
 
   }
 
@@ -188,6 +201,15 @@ export class LoginComponent implements OnInit, OnDestroy{
 
         if(response.success.data.success){
 
+          this.errorService.setErrors({
+            data: {
+              type: 'SUCCESS_ALERT'
+            },
+            messages: response.success.messages,
+            type: 'SYSTEM_ERROR',
+            status: 200
+          }, 'SYSTEM_ERROR');
+
           this.router.navigate([this.configService.forgotPasswordUrl]);
 
         }
@@ -200,13 +222,13 @@ export class LoginComponent implements OnInit, OnDestroy{
 
   protected hasError(key: string): boolean {
 
-    return this.errorService.hasError(key, 'STANDARD_ERROR');
+    return !!this.errors.messages[key];
 
   }
 
-  protected getErrors(): string[] | undefined {
+  protected getErrors(): string[] {
 
-    return this.errorService.getErrors('STANDARD_ERROR');
+    return Object.keys(this.errors.messages);
 
   }
 
@@ -219,6 +241,12 @@ export class LoginComponent implements OnInit, OnDestroy{
     this.password = '';
 
     this.errorService.clearErrors('STANDARD_ERROR');
+
+  }
+
+  protected showResendEmailLink(): void{
+
+    this.router.navigate([this.configService.resendVerifyEmail]);
 
   }
 

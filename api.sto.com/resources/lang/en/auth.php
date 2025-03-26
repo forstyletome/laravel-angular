@@ -7,5 +7,6 @@ return [
     'session_expired' => 'Your session has expired. Please log in again.',
     'password_reset_too_soon' => 'Вы уже запрашивали сброс пароля. Повторите попытку позже.',
     'password_reset_success' => 'Пароль успешно изменён.',
-    'password_reset_failed' => 'Ошибка при сбросе пароля'
+    'password_reset_failed' => 'Ошибка при сбросе пароля',
+    'password_reset_sent' => 'A password reset E-mail has been successfully sent to your email address.'
 ];

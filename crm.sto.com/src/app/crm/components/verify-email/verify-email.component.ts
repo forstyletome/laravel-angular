@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {LanguageSwitcherComponent} from '../language-switcher/language-switcher.component';
 import {NgForOf, NgIf} from '@angular/common';
@@ -7,6 +7,8 @@ import {StyleService} from '../../services/style/style.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AuthService} from '../../services/auth/auth.service';
 import {VerifyResponse} from '../../models/auth.service';
+import {ErrorService} from '../../services/errors/error.service';
+import {ResponseErrors} from '../../models/error.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -22,17 +24,24 @@ import {VerifyResponse} from '../../models/auth.service';
   standalone: true,
   styleUrl: './verify-email.component.scss'
 })
-export class VerifyEmailComponent {
 
-  errorsMessage: {[key: string]: string[]} = {};
+export class VerifyEmailComponent implements OnInit, OnDestroy{
 
   id: number = 0;
   hash: string = '';
   expires:number = 0;
 
-  resultVerify:boolean = false;
+  public errors: ResponseErrors = {
+    data: {},
+    messages: {},
+    type: '',
+    status: 0
+  };
+
+  protected readonly Object: ObjectConstructor = Object;
 
   constructor(
+    private errorService: ErrorService,
     private styleService: StyleService,
     private route: ActivatedRoute,
     private authService: AuthService,
@@ -50,63 +59,56 @@ export class VerifyEmailComponent {
       this.hash = params['hash'] || '';
       this.expires = params['expires'] || 0;
 
-      this.verifyEmail(this.id, this.hash, this.expires);
+      await this.verifyEmail();
+
+    });
+
+    this.errorService.errors$.subscribe((errors:ResponseErrors):void => {
+
+      this.errors = errors;
 
     });
 
   }
 
-  getErrors(): string[] {
-    return Object.values(this.errorsMessage).flat();
-  }
+  protected async verifyEmail():Promise<void> {
 
-  verifyEmail(
-    id: number,
-    hash: string,
-    expires: number
-  ) {
+    this.errorService.clearErrors('STANDARD_ERROR');
 
-    this.authService.verifyEmail(
-      id,
-      hash,
-      expires
-    ).then(
-      (data: VerifyResponse) => {
+    const response: VerifyResponse = await this.authService.verifyEmail(this.id, this.hash, this.expires);
 
-          this.resultVerify = true;
-          this.errorsMessage = {};
+    if(response.success.data.success){
 
-      },
-      (error) => {
+      this.errorService.setErrors({
+        data: {
+          type: 'SUCCESS_ALERT'
+        },
+        messages: response.success.messages,
+        type: 'SYSTEM_ERROR',
+        status: 200
+      }, 'SYSTEM_ERROR');
 
-        console.log(error);
+      await this.router.navigate(['/login']);
 
-        switch (error.status) {
-
-          case 401:
-          case 403:
-          case 410:
-
-            this.errorsMessage = error.error;
-
-          break;
-
-          case 422:
-
-            this.errorsMessage = error.error.errors;
-
-          break;
-
-        }
-
-      }
-    );
+    }
 
   }
 
-  toLogin():void{
+  protected onResendVerifyEmail(): void{
 
-    this.router.navigate(['/login']);
+    this.router.navigate(['/resend-verify-email']);
+
+  }
+
+  protected getErrors(): string[] {
+
+    return Object.keys(this.errors.messages);
+
+  }
+
+  ngOnDestroy(): void {
+
+    this.errorService.clearErrors('STANDARD_ERROR');
 
   }
 

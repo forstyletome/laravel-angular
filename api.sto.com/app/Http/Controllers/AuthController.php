@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Notifications\CustomResetPassword;
-use App\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +59,7 @@ class AuthController extends Controller
 
         if(!$user->hasVerifiedEmail()){
 
-            return $this->errorResponse(__('auth.email_not_verified'), 403);
+            return $this->errorResponse(__('auth.email_not_verified'), 403, ['showHideResendLink' => true]);
 
         }
 
@@ -268,10 +266,6 @@ class AuthController extends Controller
 
     }
 
-
-
-
-
     public function register(Request $request): JsonResponse
     {
 
@@ -284,10 +278,7 @@ class AuthController extends Controller
 
         if($validator->fails()){
 
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->errorResponse($validator->errors()->messages(), 422);
 
         }
 
@@ -296,8 +287,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
-                'password' => Hash::make($request->input('password')),
-                'email_verified_at' => null,
+                'password' => Hash::make($request->input('password'))
             ]);
 
             $defaultRole = 'admin';
@@ -313,20 +303,13 @@ class AuthController extends Controller
 
             $user->givePermissionTo($defaultPermissions);
 
-            $user->notify(new VerifyEmail());
+            $user->sendEmailVerificationNotification();
 
-            return response()->json([
-                'errors' => [],
-                'success' => true,
-                'data' => $user,
-            ], 201);
+            return $this->successResponse('', 201, ['success' => true]);
 
         }catch(\Exception $e){
 
-            return response()->json([
-                'success' => false,
-                'errors' => $e->getMessage(),
-            ], 500);
+            return $this->errorResponse($e->getMessage(), 500);
 
         }
 
@@ -334,15 +317,22 @@ class AuthController extends Controller
 
     public function verifyEmail(Request $request): JsonResponse
     {
-        $request->validate([
+
+        $validator = Validator::make($request->all(), [
             'id' => 'required|exists:users,id',
             'hash' => 'required|string',
             'expires' => 'required|integer',
         ]);
 
+        if($validator->fails()){
+
+            return $this->errorResponse($validator->errors()->messages(), 422);
+
+        }
+
         if($request->expires < now()->timestamp){
 
-            return response()->json(['message' => __('validation.broken_link')], 410);
+            return $this->errorResponse(__('validation.broken_link'), 410);
 
         }
 
@@ -350,31 +340,58 @@ class AuthController extends Controller
 
         if(!hash_equals(sha1($user->getEmailForVerification()), $request->hash)){
 
-            return response()->json(['message' => __('validation.broken_link')], 403);
+            return $this->errorResponse(__('validation.broken_link'), 403);
 
         }
 
         if($user->hasVerifiedEmail()){
 
-            return response()->json([
-                'message' => __('validation.email_already_verified')
-            ], 403);
+            return $this->errorResponse(__('validation.email_already_verified'), 403);
 
         }
 
         $user->markEmailAsVerified();
 
-        return response()->json(['message' => __('validation.success_email')]);
+        return $this->successResponse(__('validation.success_email'), 200, ['success' => true]);
 
     }
 
+    public function resendVerifyEmail(Request $request): JsonResponse
+    {
 
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email'
+        ]);
 
+        if($validator->fails()){
 
+            return $this->errorResponse($validator->errors()->messages(), 422);
 
+        }
 
+        $user = User::where('email', $request->email)->first();
 
+        if($user->hasVerifiedEmail()){
 
+            return $this->errorResponse('Email уже подтверждён.', 400);
+
+        }
+
+        $key = 'email-resend:'.$user->id;
+
+        if(RateLimiter::tooManyAttempts($key, 1)){
+
+            return $this->errorResponse('Слишком много попыток. Попробуйте через '.RateLimiter::availableIn($key).' секунд.', 429);
+
+        }
+
+        RateLimiter::hit($key, 60);
+
+        $user->sendEmailVerificationNotification();
+
+        return $this->successResponse('Ссылка для подтверждения успешно отправлена на Ваш E-mail.', 200, ['success' => true]);
+
+    }
 
     public function user(Request $request): JsonResponse
     {

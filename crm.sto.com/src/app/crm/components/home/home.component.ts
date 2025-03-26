@@ -1,5 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {AuthService} from '../../services/auth/auth.service';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -9,10 +8,17 @@ import {AuthService} from '../../services/auth/auth.service';
   styleUrl: './home.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy{
 
   constructor(
-    private authService: AuthService
   ){}
+
+  ngOnInit(): void {
+
+  }
+
+  ngOnDestroy(): void {
+
+  }
 
 }
