@@ -14,18 +14,22 @@ export class ConfigService{
   apiPrefix: string = '/api';
   domainFileNameUrl: string = 'config/domains-config.json';
   sanctumUrl: string = '/sanctum/csrf-cookie';
-  checkAuthUrl: string = '/check-auth';
-  loginUrl: string = '/login';
-  registerUrl: string = '/register';
-  verifyEmailUrl: string = '/verify-email';
-  forgotPasswordUrl: string = '/forgot-password';
-  resetPasswordUrl: string = '/reset-password';
-  verify2FACodeUrl: string = '/verify-2fa';
-  resendVerifyEmail: string = '/resend-verify-email';
-  resend2FACodeUrl: string = '/resend-2fa';
-  logoutUrl: string = '/logout';
-  userUrl: string = '/user';
   translationsUrl: string = '/translations';
+
+  checkAuthUrl: string = '/auth/check-auth';
+  loginUrl: string = '/auth/login';
+  verify2FACodeUrl: string = '/auth/verify-2fa';
+  resend2FACodeUrl: string = '/auth/resend-2fa';
+  logoutUrl: string = '/auth/logout';
+
+  registerUrl: string = '/register';
+  verifyEmailUrl: string = '/register/verify-email';
+  resendVerifyEmail: string = '/register/resend-verify-email';
+
+  forgotPasswordUrl: string = '/password/forgot-password';
+  resetPasswordUrl: string = '/password/reset-password';
+
+  userUrl: string = '/user';
 
   constructor(
     private http: HttpClient,
