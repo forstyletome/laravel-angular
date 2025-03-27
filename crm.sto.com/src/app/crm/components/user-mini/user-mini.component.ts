@@ -3,7 +3,9 @@ import {AuthService} from '../../services/auth/auth.service';
 import {Router} from '@angular/router';
 import {StyleService} from '../../services/style/style.service';
 import {NgClass} from '@angular/common';
-import {LogoutResponse, User} from '../../models/auth.service';
+import {LogoutResponse} from '../../models/auth.service';
+import {UserService} from '../../services/user/user.service';
+import {User} from '../../models/user.service';
 
 @Component({
   selector: 'app-user-mini',
@@ -24,13 +26,14 @@ export class UserMiniComponent implements OnInit{
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private styleService: StyleService
   ){}
 
   ngOnInit():void {
 
-    this.authService.user$.subscribe((response:User):void => {
+    this.userService.user$.subscribe((response:User):void => {
 
       if(response.id > 0){
 
@@ -55,9 +58,9 @@ export class UserMiniComponent implements OnInit{
         };
 
         this.authService.setAuthentication(false);
-        this.authService.setUser(user);
-        this.authService.setUserRole([]);
-        this.authService.setUserPermission([]);
+        this.userService.setUser(user);
+        this.userService.setUserRole([]);
+        this.userService.setUserPermission([]);
 
         this.styleService.setBodyClass('');
 

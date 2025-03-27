@@ -1,33 +1,4 @@
 <?php
-
-/*
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PasswordResetController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\TranslationController;
-use App\Http\Controllers\TwoFactorAuthController;
-use Illuminate\Support\Facades\Route;
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/verify-2fa', [TwoFactorAuthController::class, 'verify2FA']);
-Route::post('/resend-2fa', [TwoFactorAuthController::class, 'resend2FACode']);
-
-Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/verify-email', [RegisterController::class, 'verifyEmail'])->name('verification.verify');
-Route::post('/resend-verify-email', [RegisterController::class, 'resendVerifyEmail'])->name('verification.resend');
-
-Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.reset');
-Route::post('/reset-password', [PasswordResetController::class, 'reset']);
-
-Route::post('/logout', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
-
-Route::get('/check-auth', [AuthController::class, 'checkAuthenticated']);
-
-Route::get('/translations', [TranslationController::class, 'getAllTranslations']);
-
-//Route::middleware(['auth:sanctum', 'verified'])->get('/protected-route', [AuthController::class, 'protectedRoute']);
-*/
-
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
@@ -62,5 +33,4 @@ Route::prefix('password')->group(function (){
 
 Route::get('/translations', [TranslationController::class, 'getAllTranslations']);
 
-// Пример защищенного маршрута
 // Route::middleware(['auth:sanctum', 'verified'])->get('/protected-route', [AuthController::class, 'protectedRoute']);

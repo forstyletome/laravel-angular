@@ -7,8 +7,8 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {RouterLink} from '@angular/router';
 import {StyleService} from '../../services/style/style.service';
 import {FormsModule} from '@angular/forms';
-import {AuthService} from '../../services/auth/auth.service';
-import { ResendVerifyEmailResponse } from '../../models/auth.service';
+import {ResendVerifyEmailResponse} from '../../models/register.service';
+import {RegisterService} from '../../services/register/register.service';
 
 @Component({
   selector: 'app-resend-verify-email',
@@ -44,7 +44,7 @@ export class ResendVerifyEmailComponent implements OnInit, OnDestroy{
   constructor(
     private errorService: ErrorService,
     private styleService: StyleService,
-    private authService: AuthService
+    private registerService: RegisterService
   ){}
 
   ngOnInit():void {
@@ -63,7 +63,7 @@ export class ResendVerifyEmailComponent implements OnInit, OnDestroy{
 
     this.errorService.clearErrors('STANDARD_ERROR');
 
-    const resendVerifyEmail: ResendVerifyEmailResponse = await this.authService.resendVerifyEmail(this.email);
+    const resendVerifyEmail: ResendVerifyEmailResponse = await this.registerService.resendVerifyEmail(this.email);
 
     if(resendVerifyEmail.success.data.success){
 

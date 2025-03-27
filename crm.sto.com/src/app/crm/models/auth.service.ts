@@ -10,6 +10,27 @@ export interface LoginResponse {
   }
 }
 
+export interface LogoutResponse {
+  success:{
+    data:{
+      success: boolean
+    }
+  }
+}
+
+/*
+export interface LoginResponse {
+  success: {
+    type: string,
+    messages: {
+      [key: string]: string
+    },
+    data: {
+      success: boolean
+    }
+  }
+}
+
 export interface resend2FAResponse {
   success: {
     type: string,
@@ -122,3 +143,4 @@ export interface ResendVerifyEmailResponse {
     }
   }
 }
+*/

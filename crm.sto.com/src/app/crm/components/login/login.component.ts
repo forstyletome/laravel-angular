@@ -7,14 +7,16 @@ import {StyleService} from '../../services/style/style.service';
 import {TranslatePipe} from '@ngx-translate/core';
 import {LanguageSwitcherComponent} from '../language-switcher/language-switcher.component';
 import {
-  ForgotPasswordResponse,
-  LoginResponse,
-  resend2FAResponse,
-  VerifyTwoFactorCodeResponse
+  LoginResponse
 } from '../../models/auth.service';
 import {ErrorService} from '../../services/errors/error.service';
 import {ResponseErrors} from '../../models/error.service';
 import {ConfigService} from '../../services/config/config.service';
+import {resend2FAResponse, VerifyTwoFactorCodeResponse} from '../../models/two-factor-auth';
+import {TwoFactorAuthService} from '../../services/two-factor-auth/two-factor-auth.service';
+import {UserService} from '../../services/user/user.service';
+import {RegisterService} from '../../services/register/register.service';
+import {ForgotPasswordResponse} from '../../models/register.service';
 
 @Component({
   selector: 'app-login',
@@ -74,6 +76,9 @@ export class LoginComponent implements OnInit, OnDestroy{
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
+    private twoFactorAuthService: TwoFactorAuthService,
+    private registerService: RegisterService,
     private router: Router,
     private styleService: StyleService,
     private errorService: ErrorService,
@@ -125,14 +130,14 @@ export class LoginComponent implements OnInit, OnDestroy{
 
     this.errorService.clearErrors('STANDARD_ERROR');
 
-    await this.authService.verifyTwoFactorCode(this.email, this.code).then((response:VerifyTwoFactorCodeResponse):void => {
+    await this.twoFactorAuthService.verifyTwoFactorCode(this.email, this.code).then((response:VerifyTwoFactorCodeResponse):void => {
 
         if(response.success.data.user.id > 0){
 
           this.authService.setAuthentication(true);
-          this.authService.setUser(response.success.data.user);
-          this.authService.setUserRole(response.success.data.roles);
-          this.authService.setUserPermission(response.success.data.permissions);
+          this.userService.setUser(response.success.data.user);
+          this.userService.setUserRole(response.success.data.roles);
+          this.userService.setUserPermission(response.success.data.permissions);
 
           this.styleService.setBodyClass('');
 
@@ -165,7 +170,7 @@ export class LoginComponent implements OnInit, OnDestroy{
 
     }, 1000);
 
-    await this.authService.resend2FA(this.email, this.countdown).then((response:resend2FAResponse): void => {
+    await this.twoFactorAuthService.resend2FA(this.email, this.countdown).then((response:resend2FAResponse): void => {
 
         this.codeResented  = true;
         this.codeResentedText = response.success.messages;
@@ -195,7 +200,7 @@ export class LoginComponent implements OnInit, OnDestroy{
 
     this.errorService.clearErrors('STANDARD_ERROR');
 
-    await this.authService.forgotPassword(this.email).then(
+    await this.registerService.forgotPassword(this.email).then(
 
       (response:ForgotPasswordResponse):void => {
 

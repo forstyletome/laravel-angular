@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
-import {ErrorService} from '../errors/error.service';
 import {DomainApiMapResponse} from '../../models/config.service';
 
 @Injectable({
@@ -32,8 +31,7 @@ export class ConfigService{
   userUrl: string = '/user';
 
   constructor(
-    private http: HttpClient,
-    private errorService: ErrorService
+    private http: HttpClient
   ){}
 
   async init():Promise<void> {

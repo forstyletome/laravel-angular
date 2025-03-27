@@ -5,10 +5,10 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {LanguageSwitcherComponent} from '../language-switcher/language-switcher.component';
 import {StyleService} from '../../services/style/style.service';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {AuthService} from '../../services/auth/auth.service';
-import {ResetPasswordData, ResetPasswordResponse} from '../../models/auth.service';
 import {ResponseErrors} from '../../models/error.service';
 import {ErrorService} from '../../services/errors/error.service';
+import {ResetPasswordData, ResetPasswordResponse} from '../../models/register.service';
+import {RegisterService} from '../../services/register/register.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -51,7 +51,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy{
   constructor(
     private styleService: StyleService,
     private route: ActivatedRoute,
-    private authService: AuthService,
+    private registerService: RegisterService,
     private errorService: ErrorService
   ){}
 
@@ -85,7 +85,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy{
       password_confirmation: this.password_confirmation
     }
 
-    const resetPassword: ResetPasswordResponse = await this.authService.resetPassword(data);
+    const resetPassword: ResetPasswordResponse = await this.registerService.resetPassword(data);
 
     if(resetPassword.success.data.success){
 

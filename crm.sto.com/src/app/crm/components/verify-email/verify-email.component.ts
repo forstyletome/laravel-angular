@@ -5,10 +5,10 @@ import {NgForOf, NgIf} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {StyleService} from '../../services/style/style.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {AuthService} from '../../services/auth/auth.service';
-import {VerifyResponse} from '../../models/auth.service';
 import {ErrorService} from '../../services/errors/error.service';
 import {ResponseErrors} from '../../models/error.service';
+import {VerifyResponse} from '../../models/register.service';
+import {RegisterService} from '../../services/register/register.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -44,7 +44,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy{
     private errorService: ErrorService,
     private styleService: StyleService,
     private route: ActivatedRoute,
-    private authService: AuthService,
+    private registerService: RegisterService,
     private router: Router
   ){
   }
@@ -75,7 +75,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy{
 
     this.errorService.clearErrors('STANDARD_ERROR');
 
-    const response: VerifyResponse = await this.authService.verifyEmail(this.id, this.hash, this.expires);
+    const response: VerifyResponse = await this.registerService.verifyEmail(this.id, this.hash, this.expires);
 
     if(response.success.data.success){
 

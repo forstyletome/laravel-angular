@@ -3,12 +3,12 @@ import {FormsModule} from "@angular/forms";
 import {LanguageSwitcherComponent} from "../language-switcher/language-switcher.component";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {TranslatePipe} from "@ngx-translate/core";
-import {AuthService} from '../../services/auth/auth.service';
-import {Router, RouterLink} from '@angular/router';
+import {RouterLink} from '@angular/router';
 import {StyleService} from '../../services/style/style.service';
-import {RegisterData, RegisterResponse} from '../../models/auth.service';
 import {ResponseErrors} from '../../models/error.service';
 import {ErrorService} from '../../services/errors/error.service';
+import {RegisterData, RegisterResponse} from '../../models/register.service';
+import {RegisterService} from '../../services/register/register.service';
 
 @Component({
   selector: 'app-register',
@@ -61,7 +61,7 @@ export class RegisterComponent implements OnInit, OnDestroy{
   }
 
   constructor(
-    private authService: AuthService,
+    private registerService: RegisterService,
     private styleService: StyleService,
     private errorService: ErrorService,
   ){}
@@ -78,7 +78,7 @@ export class RegisterComponent implements OnInit, OnDestroy{
       policy: this.policy
     };
 
-    const response: RegisterResponse = await this.authService.register(data);
+    const response: RegisterResponse = await this.registerService.register(data);
 
     if(response.success.data.success){
 
