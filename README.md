@@ -1,5 +1,45 @@
 Laravel 12
 
+Project Architecture:
+- CSRF + Cookie-based Authentication
+- Laravel Sanctum
+- RESTful API
+- Spatie Laravel Permission
+
+Implemented Features:
+- Multi-domain support
+- Authentication & Authorization (Laravel Sanctum, Cookie-based Auth)
+- User registration with E-mail verification
+- Password recovery via E-mail
+- Two-Factor Authentication (2FA) with one-time code sent to E-mail
+- User roles and permissions (Spatie Laravel Permission)
+- RESTful API with CORS support
+- CSRF protection with X-XSRF-TOKEN
+
+Angular 19
+
+Project Architecture:
+- Interceptors: Handling errors and X-XSRF-TOKEN
+- Guards: Securing protected routes
+- Services: Authorization, registration, user management, error handling, etc.
+- Components: Authorization, registration, user management, error handling, etc.
+
+Implemented Features:
+- Full authentication & authorization (CSRF + Cookie-based Auth)
+- Multi-domain site support
+- User registration with E-mail verification
+- Password recovery via E-mail
+- Two-Factor Authentication (2FA) with one-time code sent to E-mail
+- Access control based on roles and permissions
+- Access management using Guards and Interceptors
+- Automatic session status validation
+- API error handling with localized server messages
+- Complete CSRF protection via X-XSRF-TOKEN
+
+-----
+
+Laravel 12
+
 Архитектура проекта:
 - CSRF + Cookie-based Authentication
 - Laravel Sanctum
