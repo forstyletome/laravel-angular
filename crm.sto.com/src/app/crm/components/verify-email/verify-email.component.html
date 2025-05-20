@@ -1,0 +1,53 @@
+<section class="auth bg-base d-flex flex-wrap">
+
+  <div class="auth-left d-lg-block d-none">
+
+    <div class="d-flex align-items-center flex-column h-100 justify-content-center">
+
+      <img src="/images/auth/auth-img.png" alt="">
+
+    </div>
+
+  </div>
+
+  <div class="auth-right py-32 px-24 d-flex flex-column justify-content-center">
+
+    <div class="max-w-464-px mx-auto w-100">
+
+      <app-language-switcher></app-language-switcher>
+
+      <div>
+
+        <a href="index.html" class="mb-40 max-w-290-px">
+          <img src="/images/logo.png" alt="">
+        </a>
+
+        <h4 class="mb-12">{{ 'MESS_41' | translate }}</h4>
+
+      </div>
+
+      <div *ngIf="Object.keys(errors.messages).length == 0">
+
+        {{ 'MESS_42' | translate }}
+
+      </div>
+
+      <div class="d-flex flex-column gap-2 mt-20" *ngIf="Object.keys(errors.messages).length > 0">
+
+        <div class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
+          <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors.messages[key] }}</span>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32" (click)="onResendVerifyEmail()">{{ 'MESS_44' | translate }}</button>
+
+      <div class="mt-32 text-center text-sm" *ngIf="Object.keys(errors.messages).length > 0">
+        <p class="mb-0">{{ 'MESS_26' | translate }} <a [routerLink]="'/login'" class="text-primary-600 fw-semibold">{{ 'MESS_10' | translate }}</a></p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

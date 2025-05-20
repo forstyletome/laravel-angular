@@ -1,0 +1,167 @@
+<section class="auth bg-base d-flex flex-wrap">
+
+  <div class="auth-left d-lg-block d-none">
+
+    <div class="d-flex align-items-center flex-column h-100 justify-content-center">
+
+      <img src="/images/auth/auth-img.png" alt="">
+
+    </div>
+
+  </div>
+
+  <div class="auth-right py-32 px-24 d-flex flex-column justify-content-center">
+
+    <div class="max-w-464-px mx-auto w-100">
+
+      <app-language-switcher></app-language-switcher>
+
+      <div>
+
+        <a href="index.html" class="mb-40 max-w-290-px">
+          <img src="/images/logo.png" alt="">
+        </a>
+
+        <h4 class="mb-12" *ngIf="!registrationSuccess">{{ 'MESS_30' | translate }}</h4>
+
+        <p class="mb-32 text-secondary-light text-lg" *ngIf="!registrationSuccess">{{ 'MESS_31' | translate }}</p>
+
+        <h4 class="mb-12" *ngIf="registrationSuccess">{{ 'MESS_39' | translate }}</h4>
+
+        <div *ngIf="registrationSuccess" class="alert alert-success bg-success-100 text-success-600 border-success-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8 d-flex align-items-center justify-content-between" role="alert">
+
+          <div class="d-flex align-items-center gap-2">
+
+            {{ 'MESS_40' | translate }}
+
+          </div>
+
+          <button class="remove-button text-success-600 text-xxl line-height-1"> <iconify-icon icon="iconamoon:sign-times-light" class="icon"></iconify-icon></button>
+
+        </div>
+
+      </div>
+
+      <form>
+
+        <div class="icon-field mb-16" *ngIf="!registrationSuccess">
+
+          <span class="icon top-50 translate-middle-y">
+
+            <iconify-icon icon="f7:person"></iconify-icon>
+
+          </span>
+
+          <input [(ngModel)]="name" type="text" placeholder="{{ 'MESS_33' | translate }}" class="form-control h-56-px bg-neutral-50 radius-12" [ngClass]="{'is-invalid': hasError('name')}" name="name">
+
+        </div>
+
+        <div class="icon-field mb-16" *ngIf="!registrationSuccess">
+
+          <span class="icon top-50 translate-middle-y">
+
+            <iconify-icon icon="mage:email"></iconify-icon>
+
+          </span>
+
+          <input [(ngModel)]="email" type="email" placeholder="{{ 'MESS_7' | translate }}" class="form-control h-56-px bg-neutral-50 radius-12" [ngClass]="{'is-invalid': hasError('email')}" name="email">
+
+        </div>
+
+        <div class="mb-20" *ngIf="!registrationSuccess">
+
+          <div class="position-relative mb-20">
+
+            <div class="icon-field">
+
+              <span class="icon top-50 translate-middle-y">
+
+                <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+
+              </span>
+
+              <input [(ngModel)]="password" [attr.type]="showHidePassword ? 'text' : 'password'" placeholder="{{ 'MESS_8' | translate }}" class="form-control h-56-px bg-neutral-50 radius-12" name="password" [ngClass]="{'is-invalid': hasError('password')}">
+
+            </div>
+
+            <span class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light" [ngClass]="{'ri-eye-off-line': showHidePassword}" (click)="togglePassword()"></span>
+
+          </div>
+
+          <div class="position-relative">
+
+            <div class="icon-field">
+
+            <span class="icon top-50 translate-middle-y">
+
+              <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+
+            </span>
+
+              <input [(ngModel)]="password_confirmation" placeholder="{{ 'MESS_22' | translate }}" [attr.type]="showHidePassword ? 'text' : 'password'" class="form-control h-56-px bg-neutral-50 radius-12" name="password_confirmation" [ngClass]="{'is-invalid': hasError('password')}">
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="mb-20" *ngIf="!registrationSuccess">
+
+          <div class="d-flex justify-content-between gap-2">
+            <div class="form-check style-check d-flex align-items-start">
+
+              <input [(ngModel)]="policy" class="form-check-input border border-neutral-300 mt-4" type="checkbox" name="policy" id="condition" [ngClass]="{'is-invalid': hasError('policy')}">
+
+              <label class="form-check-label text-sm" for="condition">
+                {{ 'MESS_35' | translate }}
+                <a href="javascript:void(0)" class="text-primary-600 fw-semibold">{{ 'MESS_36' | translate }}</a>{{ 'MESS_37' | translate }}
+                <a href="javascript:void(0)" class="text-primary-600 fw-semibold">{{ 'MESS_38' | translate }}</a>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="d-flex flex-column gap-2 mt-20" *ngIf="getErrors().length > 0">
+
+          <div class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
+            <span class="fw-medium text-danger-600 text-sm mt-8">{{ errors.messages[key] }}</span>
+          </div>
+
+        </div>
+
+        <br/>
+
+        <button type="submit" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12" (click)="register()" *ngIf="!registrationSuccess">{{ 'MESS_32' | translate }}</button>
+
+        <!--
+
+        <div class="mt-32 center-border-horizontal text-center" *ngIf="!registrationSuccess">
+          <span class="bg-base z-1 px-4">{{ 'MESS_11' | translate }}</span>
+        </div>
+
+        <div class="mt-32 d-flex align-items-center gap-3" *ngIf="!registrationSuccess">
+          <button type="button" class="fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50">
+            <iconify-icon icon="ic:baseline-facebook" class="text-primary-600 text-xl line-height-1"></iconify-icon>
+            {{ 'MESS_12' | translate }}
+          </button>
+          <button type="button" class="fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50">
+            <iconify-icon icon="logos:google-icon" class="text-primary-600 text-xl line-height-1"></iconify-icon>
+            {{ 'MESS_13' | translate }}
+          </button>
+        </div>
+
+        -->
+
+        <div class="mt-32 text-center text-sm" *ngIf="!registrationSuccess">
+          <p class="mb-0">{{ 'MESS_26' | translate }} <a [routerLink]="'/login'" class="text-primary-600 fw-semibold">{{ 'MESS_10' | translate }}</a></p>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>

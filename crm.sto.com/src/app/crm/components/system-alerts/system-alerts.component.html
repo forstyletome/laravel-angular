@@ -1,0 +1,11 @@
+<div class="d-flex flex-column gap-2 mt-20" *ngIf="getErrors().length > 0">
+
+  <div [ngClass]="{ 'alert-success bg-success-100 text-success-600 border-success-100': errors.data.type == 'SUCCESS_ALERT'}" class="alert alert-danger bg-danger-100 text-danger-600 border-danger-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8" role="alert" *ngFor="let key of getErrors()">
+
+    <span class="fw-medium text-sm mt-8">{{ errors.messages[key] }}</span>
+
+    <button class="remove-button text-success-600 text-xxl line-height-1" (click)="closeWindow()"> <iconify-icon icon="iconamoon:sign-times-light" class="icon"></iconify-icon></button>
+
+  </div>
+
+</div>

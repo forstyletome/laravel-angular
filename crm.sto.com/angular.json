@@ -1,0 +1,133 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "ang1.com": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/crm.sto.com",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/app/crm/assets"
+              }
+            ],
+            "styles": [
+              "src/app/crm/assets/styles/remixicon.css",
+              "src/app/crm/assets/styles/lib/bootstrap.min.css",
+              "src/app/crm/assets/styles/lib/apexcharts.css",
+              "src/app/crm/assets/styles/lib/dataTables.min.css",
+              "src/app/crm/assets/styles/lib/editor-katex.min.css",
+              "src/app/crm/assets/styles/lib/editor.atom-one-dark.min.css",
+              "src/app/crm/assets/styles/lib/editor.quill.snow.css",
+              "src/app/crm/assets/styles/lib/flatpickr.min.css",
+              "src/app/crm/assets/styles/lib/full-calendar.css",
+              "src/app/crm/assets/styles/lib/magnific-popup.css",
+              "src/app/crm/assets/styles/lib/slick.css",
+              "src/app/crm/assets/styles/lib/prism.css",
+              "src/app/crm/assets/styles/lib/file-upload.css",
+              "src/app/crm/assets/styles/lib/audioplayer.css",
+              "src/app/crm/assets/styles/style.css"
+            ],
+            "scripts": [
+              "src/app/crm/assets/js/lib/jquery-3.7.1.min.js",
+              "src/app/crm/assets/js/lib/bootstrap.bundle.min.js",
+              "src/app/crm/assets/js/lib/apexcharts.min.js",
+              "src/app/crm/assets/js/lib/dataTables.min.js",
+              "src/app/crm/assets/js/lib/iconify-icon.min.js",
+              "src/app/crm/assets/js/lib/jquery-ui.min.js",
+              "src/app/crm/assets/js/lib/magnifc-popup.min.js",
+              "src/app/crm/assets/js/lib/slick.min.js",
+              "src/app/crm/assets/js/lib/prism.js",
+              "src/app/crm/assets/js/lib/file-upload.js",
+              "src/app/crm/assets/js/lib/audioplayer.js",
+              "src/app/crm/assets/js/app.js",
+              "src/app/crm/assets/js/homeOneChart.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3MB",
+                  "maximumError": "3MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ang1.com:build:production"
+            },
+            "development": {
+              "buildTarget": "ang1.com:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
+}
